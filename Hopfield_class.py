@@ -4,10 +4,11 @@ from random import randint
 
 
 class Hopfield_network:
-    def __init__(self,I):
+    def __init__(self,I,N):
         self.I = I
         self.sqrt_I = int(np.sqrt(I))
         self.Weights = np.zeros(shape=(I),dtype=int)
+        self.a_i = np.zeros(shape=(N,self.I),dtype=int)
 
         self.D_target = np.zeros(shape=(self.sqrt_I,self.sqrt_I),dtype=int)
         self.J_target = np.zeros(shape=(self.sqrt_I,self.sqrt_I),dtype=int)
@@ -64,6 +65,10 @@ class Hopfield_network:
         
         return placeholderlist
     
+    def make_matrix(self):
+        pass
+
+
     def initial_mem_list(self):
         for n in range(len(self.target_matrix_mem_list)):
             self.target_mem_list.append(self.make_list(self.target_matrix_mem_list[n]))
@@ -98,21 +103,25 @@ class Hopfield_network:
 
 
 
+    def update_input(self,n):
+
+        """ Calculate all the activities"""
+        for i in range(self.sqrt_I):
+            for j in range(self.I):
+                self.a_i[i] += self.Weights[i][j]*self.input_list[n][j]
+
+        pass
+
+
+
+
 
 
 if __name__ == "__main__":
-    Hopfield = Hopfield_network(I=25)
+    Hopfield = Hopfield_network(I=25,N=4)
 
     Hopfield.inital_update(num_flip=0)
 
-    #print(len(Hopfield.target_mem_list))
-    #print(len(Hopfield.input_list))
-    print("-------------")
-    for i in range(4):
-        for k in range(25-1):
-            a = Hopfield.target_mem_list[i][k] - Hopfield.input_list[i][k]
-            if a != 0:
-                print(a)
 
     fig,ax = plt.subplots(2,2)
     k = 0
