@@ -2,6 +2,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import randint
 
+class Hopfield:
+    def __init__(self,I):
+        self.I = I
+        self.sqrt_I = int(np.sqrt(I))
+        self.Weights = np.zeros(shape=(I),dtype=int)
+        self.a_i = np.zeros(shape=(N,self.I),dtype=int)
+
+        self.matrix_mem_list = []
+        self.vec_mem_list = []
+
+        self.input_matrix_list = []
+        self.input_vec_list = []
+
+
+    def update_memories(self,arr):
+        N,I = np.shape(arr)
+
 
 class Hopfield_network:
     def __init__(self,I,N):
@@ -65,8 +82,20 @@ class Hopfield_network:
         
         return placeholderlist
     
-    def make_matrix(self):
-        pass
+    def make_matrix(self,arr):
+        N,I = np.shape(arr)
+        rows = int(np.sqrt(I))
+        matrix_list = []
+        for n in range(N):
+            matrix = np.zeros(shape=(rows,rows),dtype=int)
+            i = 0
+            for x in range(rows):
+                for y in range(rows):
+                    matrix[x][y] = arr[n][i]
+                    i += 1
+            matrix_list.append(matrix.copy())
+        return matrix_list
+
 
 
     def initial_mem_list(self):
@@ -101,16 +130,26 @@ class Hopfield_network:
 
         self.initial_mem_list()
 
+        self.initiate_weights(
+            start_mem=0
+            ,stop_mem=4
+        )
+
 
 
     def update_input(self,n):
 
         """ Calculate all the activities"""
-        for i in range(self.sqrt_I):
-            for j in range(self.I):
-                self.a_i[i] += self.Weights[i][j]*self.input_list[n][j]
+        for n in range(self.N):
+            for i in range(self.sqrt_I):
+                for j in range(self.I):
+                    self.a_i[n][i] += self.Weights[i][j]*self.input_list[n][j]
 
-        pass
+        """ Update all the inputs """
+        for n in range(self.N):
+            for i in range(self.sqrt_I):
+                for j in range(self.I):
+                    pass
 
 
 
@@ -118,6 +157,17 @@ class Hopfield_network:
 
 
 if __name__ == "__main__":
+
+    A = np.zeros(shape=(2,3))
+    B = np.zeros(2)
+    
+    AA = np.shape(A)
+    BB = np.shape(B)
+
+    print(AA[0],AA[1])
+    print(BB[0])
+
+    exit()
     Hopfield = Hopfield_network(I=25,N=4)
 
     Hopfield.inital_update(num_flip=0)
