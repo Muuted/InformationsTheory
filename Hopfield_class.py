@@ -2,22 +2,35 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import randint
 
+def make_list(arr):
+    X,Y = np.shape(arr)
+    arr_list = []
+    for x in range(X):
+        for y in range(Y):
+            arr_list.append(arr[x][y])
+
+    return arr_list
+
+
 class Hopfield:
     def __init__(self,I):
-        self.I = I
-        self.sqrt_I = int(np.sqrt(I))
         self.Weights = np.zeros(shape=(I),dtype=int)
-        self.a_i = np.zeros(shape=(N,self.I),dtype=int)
 
         self.matrix_mem_list = []
         self.vec_mem_list = []
 
-        self.input_matrix_list = []
-        self.input_vec_list = []
 
 
-    def update_memories(self,arr):
-        N,I = np.shape(arr)
+    def initiate_hopfield(self,arr):    
+    
+        self.matrix_mem_list.append(arr)
+        list_arr = make_list(arr)
+        self.vec_mem_list.append(list_arr)
+
+        for i in range(self.I):
+            for j in range(self.I):
+                self.Weights[i][j] += list_arr[i]*list_arr[j]
+                    
 
 
 class Hopfield_network:

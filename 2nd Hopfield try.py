@@ -85,6 +85,13 @@ class Hopfield:
         self.matrix_mem_list = []
         self.vec_mem_list = []
 
+    def Brain_damge(self,percent):
+        damaged_neurons = int(percent*(self.I)**2)
+
+        for _ in range(damaged_neurons):
+            i = randint(0,self.I-1)
+            j = randint(0,self.I-1)
+            self.Weights[i][j] = 0
 
 
     def initiate_hopfield(self,arr):    
@@ -175,9 +182,6 @@ def stable_memories(flipped_bits):
 
     memories_matrix_list, memories_list = generate_list_of_mem()
 
-    print(np.shape(memories_matrix_list))
-    
-
     N = np.shape(memories_matrix_list)[0]
     N += 1
     
@@ -188,20 +192,24 @@ def stable_memories(flipped_bits):
 
     noisy_letters = []
     matrix_correction = []
-
+    target_letters_list = ["D","J","C","M"]
+    k = 0    
     for n in range(N-1):
-        print("n=",n)
+        noisy_letters = []
+        matrix_correction = []
         noisy_matrix = add_noise(
             arr=memories_matrix_list[n]
             ,num_flip=flipped_bits
             )
+        #print(np.shape(memories_matrix_list[n]))
 
         noisy_arr = make_list(arr=noisy_matrix)
-        
+        #print(np.shape(noisy_arr))
         updated_arr =Hopfield_network.activity_rule(
             arr_list=noisy_arr
         )       
-        
+        #print(np.shape(updated_arr))
+
         change_input = correction_of_noise(
             arr=noisy_arr
             ,Hopfield_network=Hopfield_network
@@ -215,33 +223,124 @@ def stable_memories(flipped_bits):
                 make_matrix(arr=change_input[k])
             )
         
-        matrix_correction.append(changed_matrix.copy())
+        NN = len(changed_matrix)
 
-    print(np.shape(matrix_correction))
-    exit()
-    NN, K = np.shape(matrix_correction)[0], np.shape(matrix_correction)[1]
-    target_letters_list = ["D","J","C","M"]
-
-    fig, ax = plt.subplots(NN,K)
-    for j in range(NN):
-        for i in range(K):
-            ax[j,i].matshow(matrix_correction[j][i])
+        fig, ax = plt.subplots(1,NN)
+        #fig.get_current_fig_manager().window.showMaximized()
+        fig.canvas.manager.window.showMaximized()
+        fig.suptitle(
+            f"Target letter ={target_letters_list[n]} with Noise level ={flipped_bits} bits flipped"
+            , fontsize=25
+            )
+        for i in range(NN):
+            ax[i].matshow(changed_matrix[i])
             if i == 0:
-                ax[j,i].set_ylabel(
-                    f"Noisy {target_letters_list[j]}          "
+                ax[i].set_ylabel(
+                    f"Noisy {target_letters_list[n]}          "
                     ,rotation="horizontal",fontsize=25
                     )
-            if j==0 and i == 0:
-                ax[j,i].set_title(f"Initial noisy letter, noise level={flipped_bits}")
-            if j == 0 and i == K-1:
-                ax[j,i].set_title("final result after correction")
+                ax[i].set_title(f"Initial noisy letter, noise level={flipped_bits}")
+            if  i == NN-1:
+                ax[i].set_title("final result after correction")
+        
+        plt.draw()
+        plt.pause(0.5 )
+        fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\"
+                     + f"noise={flipped_bits}bits and Target={target_letters_list[n]}"
+                     )
+        
+        #plt.show()
+    plt.close()
 
-    plt.show()
 
+
+
+def Brain_damage_memories(flipped_bits,Brain_damage_percent):
+    Hopfield_network = Hopfield(I=25)
+
+    memories_matrix_list, memories_list = generate_list_of_mem()
+
+    N = np.shape(memories_matrix_list)[0]
+    N += 1
+    
+    for i in range(N-1):
+        Hopfield_network.initiate_hopfield(
+            arr=memories_matrix_list[i]
+        )
+
+    Hopfield_network.Brain_damge(percent=Brain_damage_percent)
+    noisy_letters = []
+    matrix_correction = []
+    target_letters_list = ["D","J","C","M"]
+    k = 0    
+    for n in range(N-1):
+        noisy_letters = []
+        matrix_correction = []
+        noisy_matrix = add_noise(
+            arr=memories_matrix_list[n]
+            ,num_flip=flipped_bits
+            )
+        #print(np.shape(memories_matrix_list[n]))
+
+        noisy_arr = make_list(arr=noisy_matrix)
+        #print(np.shape(noisy_arr))
+        updated_arr =Hopfield_network.activity_rule(
+            arr_list=noisy_arr
+        )       
+        #print(np.shape(updated_arr))
+
+        change_input = correction_of_noise(
+            arr=noisy_arr
+            ,Hopfield_network=Hopfield_network
+            )
+
+        noisy_letters.append(change_input.copy())
+
+        changed_matrix = [ ]
+        for k in range(len(change_input)):
+            changed_matrix.append(
+                make_matrix(arr=change_input[k])
+            )
+        
+        NN = len(changed_matrix)
+
+        fig, ax = plt.subplots(1,NN)
+        #fig.get_current_fig_manager().window.showMaximized()
+        fig.canvas.manager.window.showMaximized()
+        fig.suptitle(
+            f"Target letter ={target_letters_list[n]} with Noise level ={flipped_bits} bits flipped"
+            , fontsize=25
+            )
+        for i in range(NN):
+            ax[i].matshow(changed_matrix[i])
+            if i == 0:
+                ax[i].set_ylabel(
+                    f"Noisy {target_letters_list[n]}          "
+                    ,rotation="horizontal",fontsize=25
+                    )
+                ax[i].set_title(f"Initial noisy letter, noise level={flipped_bits}")
+            if  i == NN-1:
+                ax[i].set_title("final result after correction")
+        
+        plt.draw()
+        plt.pause(0.5 )
+        fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\"
+                    + f"brain damage - "
+                    + f"noise={flipped_bits}bits and Target={target_letters_list[n]}"
+                     )
+        
+        #plt.show()
+    plt.close()
 
 
 
 if __name__ == "__main__":
     #Can_add_new_memories()
-    stable_memories(flipped_bits=5)
+    flip_list = [1,5,10,15,20]
+    for i in flip_list:
+        #stable_memories(flipped_bits=i)
+        Brain_damage_memories(
+            flipped_bits=i
+            ,Brain_damage_percent=0.5
+        )
     
