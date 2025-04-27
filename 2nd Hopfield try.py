@@ -145,6 +145,9 @@ def correction_of_noise(arr,Hopfield_network):
             input.append(updated_arr.copy())
         if Change == False:
             break
+        if k > 30:
+            print(f"too many iterations , k={k}")
+            exit()
 
     return input
 
@@ -325,22 +328,24 @@ def Brain_damage_memories(flipped_bits,Brain_damage_percent):
         plt.draw()
         plt.pause(0.5 )
         fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\"
-                    + f"brain damage - "
+                    + f"brain damage ={int(Brain_damage_percent*100)} % "
                     + f"noise={flipped_bits}bits and Target={target_letters_list[n]}"
                      )
         
-        #plt.show()
-    plt.close()
+        
+       
+        plt.close()
 
 
 
 if __name__ == "__main__":
     #Can_add_new_memories()
-    flip_list = [1,5,10,15,20]
+    flip_list = [1,3,5,10,20]
     for i in flip_list:
         #stable_memories(flipped_bits=i)
+        print(i)
         Brain_damage_memories(
             flipped_bits=i
-            ,Brain_damage_percent=0.5
+            ,Brain_damage_percent=0.1
         )
     
