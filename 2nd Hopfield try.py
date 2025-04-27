@@ -2,6 +2,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import randint
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 def make_list(arr):
     X,Y = np.shape(arr)
     arr_list = []
@@ -88,10 +108,11 @@ class Hopfield:
     def Brain_damge(self,percent):
         damaged_neurons = int(percent*(self.I)**2)
 
-        for _ in range(damaged_neurons):
-            i = randint(0,self.I-1)
-            j = randint(0,self.I-1)
-            self.Weights[i][j] = 0
+        if percent > 0:
+            for _ in range(damaged_neurons):
+                i = randint(0,self.I-1)
+                j = randint(0,self.I-1)
+                self.Weights[i][j] = 0
 
 
     def initiate_hopfield(self,arr):    
@@ -149,6 +170,17 @@ def correction_of_noise(arr,Hopfield_network,flipbits,dmg=0):
             exit()
 
     return input
+
+def Brain_damage_correction_noise(arr,Hopfield_network):
+    input = arr.copy()
+
+    for _ in range(1000):
+        updated_arr = Hopfield_network.activity_rule(
+            arr_list= input
+        )
+        input = updated_arr.copy()
+
+    return updated_arr
 
 def Can_add_new_memories():
     Hopfield_network = Hopfield(I=25)
@@ -215,6 +247,8 @@ def stable_memories(flipped_bits):
         change_input = correction_of_noise(
             arr=noisy_arr
             ,Hopfield_network=Hopfield_network
+            ,flipbits=flipped_bits
+            ,dmg=0
             )
 
         noisy_letters.append(change_input.copy())
@@ -255,7 +289,6 @@ def stable_memories(flipped_bits):
         
         #plt.show()
         plt.close()
-
 
 
 
@@ -344,19 +377,179 @@ def Brain_damage_memories(flipped_bits,Brain_damage_percent):
 
 
 
+def Brain_damage_memories_V2(flipped_bits,Brain_damage_percent):
+    Hopfield_network = Hopfield(I=25)
+
+    memories_matrix_list, memories_list = generate_list_of_mem()
+
+    N = np.shape(memories_matrix_list)[0]
+    N += 1
+    
+    for i in range(N-1):
+        Hopfield_network.initiate_hopfield(
+            arr=memories_matrix_list[i]
+        )
+
+    Hopfield_network.Brain_damge(percent=Brain_damage_percent)
+    noisy_letters = []
+    matrix_correction = []
+    target_letters_list = ["D","J","C","M"]
+    k = 0    
+    for n in range(N-1):
+        noisy_letters = []
+        matrix_correction = []
+        noisy_matrix = add_noise(
+            arr=memories_matrix_list[n]
+            ,num_flip=flipped_bits
+            )
+
+        noisy_arr = make_list(arr=noisy_matrix)
+
+        out_put =Brain_damage_correction_noise(
+            arr=noisy_arr
+            ,Hopfield_network=Hopfield_network
+            )
+
+
+        out_put_matrix = make_matrix(arr=out_put)
+        changed_matrix = [noisy_matrix,out_put_matrix]
+        fig, ax = plt.subplots(1,2)
+        fig.canvas.manager.window.showMaximized()
+        fig.suptitle(
+            f"Target letter ={target_letters_list[n]} with Noise level ={flipped_bits} bits flipped"
+            , fontsize=25
+            )
+        
+        
+        for i in range(2):
+            ax[i].matshow(changed_matrix[i])
+            if i == 0:
+                ax[i].set_ylabel(
+                    f"Noisy {target_letters_list[n]}          "
+                    ,rotation="horizontal",fontsize=25
+                    )
+                ax[i].set_title(f"Initial noisy letter, noise level={flipped_bits}")
+            if  i == 1:
+                ax[i].set_title("final result after correction")
+        
+        plt.draw()
+        plt.pause(0.5 )
+        fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\Brain damage\\"
+                    + f"brain damage ={int(Brain_damage_percent*100)} % "
+                    + f"noise={flipped_bits}bits and Target={target_letters_list[n]}"
+                     )
+        
+        
+       
+        plt.close()
+
+
+
+def Qunatify_success_rate(Brain_damage_percent,repetition):
+    Hopfield_network = Hopfield(I=25)
+
+    memories_matrix_list, memories_list = generate_list_of_mem()
+
+    N = np.shape(memories_matrix_list)[0]
+    N += 1
+    
+    for i in range(N-1):
+        Hopfield_network.initiate_hopfield(
+            arr=memories_matrix_list[i]
+        )
+
+    Hopfield_network.Brain_damge(percent=Brain_damage_percent)
+    
+    noise_levels = [i for i in range(10)]
+    sucess_rate = []
+    
+    for noise in noise_levels:
+        k = 0
+        for _ in range(repetition):
+            print(
+                f" -> noise level = {noise} of {len(noise_levels)} and" 
+                + f"    -> repetition = {_} of {repetition}"
+                ,end="\r", flush=True
+                )
+            for n in range(N-1):
+                noisy_matrix = add_noise(
+                    arr=memories_matrix_list[n]
+                    ,num_flip=noise
+                    )
+
+                noisy_arr = make_list(arr=noisy_matrix)
+
+                out_put =Brain_damage_correction_noise(
+                    arr=noisy_arr
+                    ,Hopfield_network=Hopfield_network
+                    )
+
+                target_memory = memories_list[n].copy()
+
+                output_is_target = True
+                for i in range(len(target_memory)):
+                    if target_memory[i] - out_put[i] != 0:
+                        output_is_target = False
+                        break
+                if output_is_target == True:
+                    k += 1
+
+        sucess_rate.append(k/repetition)
+
+    return noise_levels, sucess_rate
+
+
+    
+
 if __name__ == "__main__":
     #Can_add_new_memories()
     
-    flip_list = [0,1,3,5,8,11]
+    """flip_list = [0,1,2,3,4,5]#,8,11]
     for flips in flip_list:
-        #stable_memories(flipped_bits=i)
-        pass
-
-    flip_list = [1,3,5]
+        stable_memories(flipped_bits=flips)
+        
+    exit()
+    flip_list = [1,2,3,4,5]
     brain_damge_list =[0.1, 0.2, 0.3 , 0.5]
     for flips in flip_list:
         for dmg in brain_damge_list:
-            Brain_damage_memories(
-                flipped_bits=flips
+            Brain_damage_memories_V2(
+                 flipped_bits=flips
                 ,Brain_damage_percent=dmg
-            )
+            )"""
+
+
+    brain_dmg =[0]# [i for i in np.arange(0,0.6,0.1)]
+    success_rate = []#[[] for i in range(len(brain_dmg))]
+    reps = 1
+    print("\n")
+    for Bdmg in brain_dmg:
+        print(f"brain damage = {Bdmg} of {brain_dmg[len(brain_dmg)-1]} percent")
+        noise,rate = Qunatify_success_rate(
+            Brain_damage_percent=Bdmg
+            ,repetition=reps
+        )
+        success_rate.append(rate)
+
+    print(
+        "------------------------- \n"
+        +" Done  \n "
+        +"------------------------- \n"
+        )
+
+    fig = plt.figure()
+    fig.canvas.manager.window.showMaximized()
+    for i in range(len(brain_dmg)):
+        plt.plot(noise,success_rate[i],label=f"Brain dmg: {brain_dmg[i]} %")
+        plt.xlabel("Noise level")
+        plt.ylabel("Success rate")
+    plt.legend()
+    plt.draw()
+    plt.pause(2)
+    plt.savefig(
+        "C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\"
+        +f"Success rate for different noise and brain damage, with repetiton={reps}"
+        )
+    plt.pause(2)
+    plt.close()
+    #plt.show()
