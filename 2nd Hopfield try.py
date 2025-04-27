@@ -70,10 +70,10 @@ def add_noise(arr,num_flip):
 
     X,Y = np.shape(arr)
     return_arr = arr.copy()
-
-    for k in range(num_flip):
-        i,j = randint(0,X-1), randint(0,Y-1)
-        return_arr[i][j] *= -1
+    if num_flip >0:
+        for k in range(num_flip):
+            i,j = randint(0,X-1), randint(0,Y-1)
+            return_arr[i][j] *= -1
 
     return return_arr
 
@@ -95,7 +95,6 @@ class Hopfield:
 
 
     def initiate_hopfield(self,arr):    
-    
         self.matrix_mem_list.append(arr)
         list_arr = make_list(arr)
         self.vec_mem_list.append(list_arr)
@@ -126,7 +125,7 @@ class Hopfield:
 
         return return_arr
 
-def correction_of_noise(arr,Hopfield_network):
+def correction_of_noise(arr,Hopfield_network,flipbits,dmg=0):
     input = [arr.copy()]
     k = 0
     Change = True
@@ -146,7 +145,7 @@ def correction_of_noise(arr,Hopfield_network):
         if Change == False:
             break
         if k > 30:
-            print(f"too many iterations , k={k}")
+            print(f"too many iterations , k={k} and flip={flipbits} and brain damage={dmg}")
             exit()
 
     return input
@@ -227,8 +226,10 @@ def stable_memories(flipped_bits):
             )
         
         NN = len(changed_matrix)
-
-        fig, ax = plt.subplots(1,NN)
+        if NN ==1:
+            fig, ax = plt.subplots(1,NN+1)
+        else:
+            fig, ax = plt.subplots(1,NN)
         #fig.get_current_fig_manager().window.showMaximized()
         fig.canvas.manager.window.showMaximized()
         fig.suptitle(
@@ -248,12 +249,12 @@ def stable_memories(flipped_bits):
         
         plt.draw()
         plt.pause(0.5 )
-        fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\"
+        fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\Noise levels\\"
                      + f"noise={flipped_bits}bits and Target={target_letters_list[n]}"
                      )
         
         #plt.show()
-    plt.close()
+        plt.close()
 
 
 
@@ -295,6 +296,8 @@ def Brain_damage_memories(flipped_bits,Brain_damage_percent):
         change_input = correction_of_noise(
             arr=noisy_arr
             ,Hopfield_network=Hopfield_network
+            ,flipbits=flipped_bits
+            ,dmg=Brain_damage_percent
             )
 
         noisy_letters.append(change_input.copy())
@@ -307,7 +310,10 @@ def Brain_damage_memories(flipped_bits,Brain_damage_percent):
         
         NN = len(changed_matrix)
 
-        fig, ax = plt.subplots(1,NN)
+        if NN ==1:
+            fig, ax = plt.subplots(1,NN+1)
+        else:
+            fig, ax = plt.subplots(1,NN)
         #fig.get_current_fig_manager().window.showMaximized()
         fig.canvas.manager.window.showMaximized()
         fig.suptitle(
@@ -327,7 +333,7 @@ def Brain_damage_memories(flipped_bits,Brain_damage_percent):
         
         plt.draw()
         plt.pause(0.5 )
-        fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\"
+        fig.savefig("C:\\Users\\AdamSkovbjergKnudsen\\Desktop\\Informations teori\\Brain damage\\"
                     + f"brain damage ={int(Brain_damage_percent*100)} % "
                     + f"noise={flipped_bits}bits and Target={target_letters_list[n]}"
                      )
@@ -340,12 +346,17 @@ def Brain_damage_memories(flipped_bits,Brain_damage_percent):
 
 if __name__ == "__main__":
     #Can_add_new_memories()
-    flip_list = [1,3,5,10,20]
-    for i in flip_list:
-        #stable_memories(flipped_bits=i)
-        print(i)
-        Brain_damage_memories(
-            flipped_bits=i
-            ,Brain_damage_percent=0.1
-        )
     
+    flip_list = [0,1,3,5,8,11]
+    for flips in flip_list:
+        #stable_memories(flipped_bits=i)
+        pass
+
+    flip_list = [1,3,5]
+    brain_damge_list =[0.1, 0.2, 0.3 , 0.5]
+    for flips in flip_list:
+        for dmg in brain_damge_list:
+            Brain_damage_memories(
+                flipped_bits=flips
+                ,Brain_damage_percent=dmg
+            )
