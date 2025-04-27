@@ -519,12 +519,12 @@ if __name__ == "__main__":
             )"""
 
 
-    brain_dmg =[0]# [i for i in np.arange(0,0.6,0.1)]
-    success_rate = []#[[] for i in range(len(brain_dmg))]
+    brain_dmg =  [0]#[i for i in np.arange(0,0.6,0.1)]
+    success_rate = []
     reps = 1
     print("\n")
     for Bdmg in brain_dmg:
-        print(f"brain damage = {Bdmg} of {brain_dmg[len(brain_dmg)-1]} percent")
+        print(f"brain damage = {Bdmg} of {brain_dmg[len(brain_dmg)-1]} percent \n ")
         noise,rate = Qunatify_success_rate(
             Brain_damage_percent=Bdmg
             ,repetition=reps
@@ -540,7 +540,7 @@ if __name__ == "__main__":
     fig = plt.figure()
     fig.canvas.manager.window.showMaximized()
     for i in range(len(brain_dmg)):
-        plt.plot(noise,success_rate[i],label=f"Brain dmg: {brain_dmg[i]} %")
+        plt.plot(noise,success_rate[i],label=f"Brain dmg: {brain_dmg[i]} %",marker="*")
         plt.xlabel("Noise level")
         plt.ylabel("Success rate")
     plt.legend()
