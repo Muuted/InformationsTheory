@@ -174,7 +174,7 @@ def correction_of_noise(arr,Hopfield_network,flipbits,dmg=0):
 def Brain_damage_correction_noise(arr,Hopfield_network):
     input = arr.copy()
 
-    for _ in range(1000):
+    for _ in range(200):
         updated_arr = Hopfield_network.activity_rule(
             arr_list= input
         )
@@ -467,7 +467,7 @@ def Qunatify_success_rate(Brain_damage_percent,repetition):
                 + f"    -> repetition = {_} of {repetition}"
                 ,end="\r", flush=True
                 )
-            for n in range(N-1):
+            for n in range(N):
                 noisy_matrix = add_noise(
                     arr=memories_matrix_list[n]
                     ,num_flip=noise
@@ -490,7 +490,7 @@ def Qunatify_success_rate(Brain_damage_percent,repetition):
                 if output_is_target == True:
                     k += 1
 
-        sucess_rate.append(k/repetition)
+        sucess_rate.append((k/N)/repetition)
 
     return noise_levels, sucess_rate
 
@@ -517,7 +517,7 @@ if __name__ == "__main__":
 
     brain_dmg =  [i for i in np.arange(0,0.6,0.1)]
     success_rate = []
-    reps = 50
+    reps = 100
     print("\n")
     for Bdmg in brain_dmg:
         print(f"brain damage = {Bdmg} of {brain_dmg[len(brain_dmg)-1]} percent \n ")
