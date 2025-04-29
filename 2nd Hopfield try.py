@@ -446,26 +446,22 @@ def Brain_damage_memories_V2(flipped_bits,Brain_damage_percent):
 
 
 def Qunatify_success_rate(Brain_damage_percent,repetition):
-    Hopfield_network = Hopfield(I=25)
-
-    memories_matrix_list, memories_list = generate_list_of_mem()
-
-    N = np.shape(memories_matrix_list)[0]
-    N += 1
-    
-    for i in range(N-1):
-        Hopfield_network.initiate_hopfield(
-            arr=memories_matrix_list[i]
-        )
-
-    Hopfield_network.Brain_damge(percent=Brain_damage_percent)
-    
     noise_levels = [i for i in range(10)]
     sucess_rate = []
     
-    for noise in noise_levels:
+    for noise in noise_levels:     
         k = 0
         for _ in range(repetition):
+            Hopfield_network = Hopfield(I=25)
+
+            memories_matrix_list, memories_list = generate_list_of_mem()
+            N = np.shape(memories_matrix_list)[0]
+        
+            for i in range(N):
+                Hopfield_network.initiate_hopfield(
+                    arr=memories_matrix_list[i]
+                )
+            Hopfield_network.Brain_damge(percent=Brain_damage_percent)
             print(
                 f" -> noise level = {noise} of {len(noise_levels)} and" 
                 + f"    -> repetition = {_} of {repetition}"
@@ -519,9 +515,9 @@ if __name__ == "__main__":
             )"""
 
 
-    brain_dmg =  [0]#[i for i in np.arange(0,0.6,0.1)]
+    brain_dmg =  [i for i in np.arange(0,0.6,0.1)]
     success_rate = []
-    reps = 1
+    reps = 50
     print("\n")
     for Bdmg in brain_dmg:
         print(f"brain damage = {Bdmg} of {brain_dmg[len(brain_dmg)-1]} percent \n ")
